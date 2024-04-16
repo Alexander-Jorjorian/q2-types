@@ -463,7 +463,14 @@ class BLAST6Format(model.TextFileFormat):
         except pd.errors.EmptyDataError:
             raise ValidationError('BLAST6 file is empty.')
         except ValueError:
-            raise ValidationError('Invalid BLAST6 format.')
+            try:
+                _ = skbio.read(str(self), format='blast+6', into=pd.DataFrame,
+                               columns=["qseqid", "sseqid", "pident", "length",
+                                        "mismatch", "gapopen", "qstart", "qend",
+                                        "sstart", "send", "evalue", "bitscore",
+                                        "qlen", "slen", "qcovs", "qcovhsp"])
+            except ValueError:
+                raise ValidationError('Invalid BLAST6 format.')
 
 
 BLAST6DirectoryFormat = model.SingleFileDirectoryFormat(
