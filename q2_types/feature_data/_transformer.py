@@ -778,8 +778,16 @@ def _224(data: pd.DataFrame) -> DifferentialFormat:
 # blast types
 @plugin.register_transformer
 def _225(ff: BLAST6Format) -> pd.DataFrame:
-    return skbio.read(str(ff), format='blast+6', into=pd.DataFrame,
-                      default_columns=True)
+    try:
+        return skbio.read(str(ff), format='blast+6', into=pd.DataFrame,
+                          default_columns=True)
+    except ValueError:
+
+        return skbio.read(str(ff), format='blast+6', into=pd.DataFrame,
+                          columns=["qseqid", "sseqid", "pident", "length",
+                                   "mismatch", "gapopen", "qstart", "qend",
+                                   "sstart", "send", "evalue", "bitscore",
+                                   "qlen", "slen", "qcovs", "qcovhsp"])
 
 
 @plugin.register_transformer
@@ -791,8 +799,15 @@ def _226(data: pd.DataFrame) -> BLAST6Format:
 
 @plugin.register_transformer
 def _227(ff: BLAST6Format) -> qiime2.Metadata:
-    data = skbio.read(
-        str(ff), format='blast+6', into=pd.DataFrame, default_columns=True)
+    try:
+        data = skbio.read(str(ff), format='blast+6', into=pd.DataFrame,
+                          default_columns=True)
+    except ValueError:
+        data = skbio.read(
+            str(ff), format='blast+6', into=pd.DataFrame, columns=["qseqid", "sseqid", "pident", "length",
+                                        "mismatch", "gapopen", "qstart", "qend",
+                                        "sstart", "send", "evalue", "bitscore",
+                                        "qlen", "slen", "qcovs", "qcovhsp"])
     # Metadata cannot have repeat index names, nor a multiindex, so we use the
     # default int index but cast to a str and give it a name.
     data.index = pd.Index(data.index.astype(str), name='id')
